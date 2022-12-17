@@ -76,11 +76,15 @@ function itemscript.dropAllDown(name, fuzzy)
 end
 
 function itemscript.dropAllUp(name, fuzzy)
-    dropFiltered(name, fuzzy or false, t.dropDown, itemMatchesFilter)
+    dropFiltered(name, fuzzy or false, t.dropUp, itemMatchesFilter)
 end
 
 function itemscript.dropAllExcept(name, fuzzy)
-    dropFiltered(name, fuzzy or false, t.drop, itemMatchesFilter)
+    dropFiltered(name, fuzzy or false, t.drop, itemNotMatchesFilter)
+end
+
+function itemscript.dropAllDownExcept(name, fuzzy)
+    dropFiltered(name, fuzzy or false, t.dropDown, itemNotMatchesFilter)
 end
 
 -- Cleans up the turtle's inventory by compacting all stacks of items.

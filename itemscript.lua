@@ -5,6 +5,8 @@ Author: Andrew Lalis <andrewlalisofficial@gmail.com>
 
 
 ]]--
+VERSION = "0.0.1"
+
 local t = turtle
 
 -- The itemscript module. Functions defined within this table are exported.

@@ -18,6 +18,7 @@ for _, script in pairs(SCRIPTS) do
     url = BASE_URL .. script
     cmd = "wget " .. url .. " " .. script
     shell.run(cmd)
+    f:write("if fs.exists(\"" .. script .. "\") then fs.delete(\"" .. script .. "\") end")
     f:write("shell.run(\"" .. cmd .. "\")")
 end
 f:close()

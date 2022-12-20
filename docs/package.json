@@ -1,0 +1,19 @@
+{
+  "name": "movescript-docs",
+  "version": "0.0.1",
+  "description": "Documentation for Movescript and associated libraries.",
+  "main": "index.js",
+  "authors": {
+    "name": "Andrew Lalis",
+    "email": "andrewlalisofficial@gmail.com"
+  },
+  "repository": "https://github.com/andrewlalis/movescript/Movescript",
+  "scripts": {
+    "dev": "vuepress dev src",
+    "build": "vuepress build src"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "vuepress": "^1.5.3"
+  }
+}

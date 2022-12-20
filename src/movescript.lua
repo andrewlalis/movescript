@@ -14,6 +14,13 @@ local t = turtle
 -- The movescript module. Functions defined within this table are exported.
 local movescript = {}
 
+movescript.defaultSettings = {
+    debug = false,
+    safe = true,
+    destructive = false,
+    fuels = {"minecraft:coal", "minecraft:charcoal"}
+}
+
 local function debug(msg, settings)
     if settings and settings.debug then
         print("[MS] " .. msg)
@@ -39,17 +46,10 @@ function t.detectBack()
     return result
 end
 
--- The default settings to apply to any robot movement, if none are specified.
-local defaultMovementSettings = {
-    safe = true,
-    destructive = false,
-    fuels = {"minecraft:coal", "minecraft:charcoal"}
-}
-
 local function goDirection(dirFunction, digFunction, detectFunction, settings)
-    settings = settings or defaultMovementSettings
-    safe = settings.safe or defaultMovementSettings.safe
-    destructive = settings.destructive or defaultMovementSettings.destructive
+    settings = settings or movescript.defaultSettings
+    safe = settings.safe or movescript.defaultSettings.safe
+    destructive = settings.destructive or movescript.defaultSettings.destructive
     local success = dirFunction()
     if not safe then return end
     while not success do
@@ -111,7 +111,7 @@ local actionMap = {
 -- Returns a boolean indicating if at least one piece of fuel was consumed.
 local function refuelAll(settings)
     debug("Refueling...", settings)
-    local fuels = settings.fuels or defaultMovementSettings.fuels
+    local fuels = settings.fuels or movescript.defaultSettings.fuels
     local refueled = false
     for slot = 1, 16 do
         local item = t.getItemDetail(slot)
@@ -134,7 +134,7 @@ local function refuelToAtLeast(requiredLevel, settings)
             "[MS] Fuel level is too low. Level: " .. t.getFuelLevel() .. ". Required: " .. requiredLevel ..
             ". Please add some of the following fuels:"
         )
-        local fuels = settings.fuels or defaultMovementSettings.fuels
+        local fuels = settings.fuels or movescript.defaultSettings.fuels
         for _, fuelName in pairs(fuels) do
             print("  - " .. fuelName)
         end
@@ -152,7 +152,12 @@ local function executeInstruction(instruction, settings)
     local action = actionMap[instruction.action]
     if action then
         debug("Executing action \"" .. instruction.action .. "\" " .. instruction.count .. " times.", settings)
-        if action.needsFuel and instruction.count > t.getFuelLevel() then
+        local shouldRefuel = (
+            (settings.safe or true) and
+            (action.needsFuel) and
+            (instruction.count > t.getFuelLevel())
+        )
+        if shouldRefuel then
             local fuelRequired = instruction.count
             refuelToAtLeast(fuelRequired, settings)
         end
@@ -184,7 +189,7 @@ local function parseScript(script, settings)
 end
 
 function movescript.run(script, settings)
-    settings = settings or defaultMovementSettings
+    settings = settings or movescript.defaultSettings
     script = script or ""
     debug("Executing script: " .. script, settings)
     local instructions = parseScript(script, settings)

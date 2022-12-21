@@ -29,6 +29,13 @@ jobs:
           mkdir min
           touch min/movescript.lua
           lua minify.lua minify src/movescript.lua > min/movescript.lua
+          
+      - name: Clean Up Repository
+        run: |
+          rm -rf .lua
+          rm -rf .luarocks
+          rm -rf .source
+          rm -f minify.lua
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4

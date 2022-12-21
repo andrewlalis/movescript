@@ -1,0 +1,30 @@
+name: Minify Scripts
+
+on:
+  push:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Install Lua
+        uses: ljmf00/setup-lua@v1.0.0
+        with:
+          lua-version: 5.3
+          install-luarocks: true
+        
+      - name: Install Minifier
+        run: wget https://raw.githubusercontent.com/stravant/lua-minify/master/minify.lua minify.lua
+        
+      - name: Minify Movescript
+        run: lua minify.lua src/movescript.lua > min/movescript.lua
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4

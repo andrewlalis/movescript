@@ -22,18 +22,6 @@ local function stackMatches(itemStack, name, fuzzy)
         )
 end
 
--- Creates a filter function that filters on items whose names match the given list of names.
-local function makeItemNamesFilter(names, fuzzy)
-    return function(item)
-        for _, itemName in pairs(names) do
-            if stackMatches(item, itemName, fuzzy) then
-                return true
-            end
-        end
-        return false
-    end
-end
-
 local function notFilter(filter)
     return function(item)
         return not filter(item)
@@ -90,11 +78,13 @@ local function parseItemFilterExpression(expr)
     if namespaceSeparatorIdx == nil and not fuzzy then
         expr = "minecraft:" .. expr
     end
-    local filter = makeItemNamesFilter({expr}, fuzzy)
-    if negated then
-        filter = notFilter(filter)
+    return function(item)
+        local matches = stackMatches(item, expr, fuzzy)
+        if negated then
+            matches = not matches
+        end
+        return matches
     end
-    return filter
 end
 
 -- Converts an arbitrary variable into a filter; useful for any function that's public, so users can supply any filter.
@@ -116,11 +106,6 @@ local function convertToFilter(var)
     else
         error("Unsupported filter type: " .. type(var))
     end
-end
-
--- Convenience function for creating a filter function that allows specifying fuzziness.
-function itemscript.nameFilter(name, fuzzy)
-    return makeItemNamesFilter({name}, fuzzy)
 end
 
 -- Gets the total number of items in the turtle's inventory that match the given expression.

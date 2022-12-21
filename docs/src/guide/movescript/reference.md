@@ -7,18 +7,14 @@ local ms = require("movescript")
 ms.run("2F")
 ```
 
-## Functions
-
-### `run(script, settings)`
+## `run(script, settings)`
 
 Runs the given `script` string as a movescript, and optionally a `settings` table can be provided. Otherwise, [default settings](settings.md) will be used.
 
-### `runFile(filename, settings)`
+## `runFile(filename, settings)`
 
 Reads content from the given filename and executes it as a script. Just like with `run`, an optional `settings` table can be provided.
 
-## Variables
-
-### `defaultSettings`
+## `defaultSettings`
 
 A table containing the default settings for any script executed by the movescript module.

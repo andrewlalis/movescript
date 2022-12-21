@@ -21,10 +21,10 @@ jobs:
           install-luarocks: true
         
       - name: Install Minifier
-        run: wget https://raw.githubusercontent.com/stravant/lua-minify/master/minify.lua minify.lua
+        run: wget https://raw.githubusercontent.com/stravant/lua-minify/master/minify.lua
         
       - name: Minify Movescript
-        run: lua minify.lua src/movescript.lua > min/movescript.lua
+        run: lua minify.lua minify src/movescript.lua > min/movescript.lua
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4

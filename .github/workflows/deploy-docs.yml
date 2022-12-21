@@ -3,6 +3,8 @@ name: Publish Docs
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - docs/**
 
   workflow_dispatch:
   
@@ -24,12 +26,7 @@ jobs:
         
       - name: Setup Pages
         uses: actions/configure-pages@v2
-        
-#       - name: Restore Cache
-#         uses: actions/cache@v3
-#         with:
-#           path: |
-#             dist
+    
       - name: Install Dependencies
         working-directory: ./docs
         run: npm install
@@ -42,6 +39,7 @@ jobs:
         uses: actions/upload-pages-artifact@v1
         with:
           path: ./docs/src/.vuepress/dist
+
   deploy:
     environment:
       name: github-pages

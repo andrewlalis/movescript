@@ -80,6 +80,7 @@ local function parseItemFilterExpression(expr)
         expr = "minecraft:" .. expr
     end
     return function(item)
+        if item == nil then return false end
         local matches = stackMatches(item, expr, fuzzy)
         if negated then
             matches = not matches

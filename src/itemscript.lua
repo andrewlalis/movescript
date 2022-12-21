@@ -36,7 +36,7 @@ function filterFunction(item, filter)
 end
 ]]--
 
-local function makeItemFilter(var, fuzzy, whitelist)
+function itemscript.makeFilter(var, fuzzy, whitelist)
     local filter = {
         filterFunction = nil,
         fuzzy = fuzzy or false,

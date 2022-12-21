@@ -77,7 +77,7 @@ local function parseItemFilterExpression(expr)
     local fuzzy = false
     local negated = false
     if prefixIdx ~= nil then
-        for i = prefixIdx, i <= prefixIdxEnd do
+        for i = prefixIdx, prefixIdxEnd do
             if expr[i] == "!" then
                 negated = true
             elseif expr[i] == "#" then

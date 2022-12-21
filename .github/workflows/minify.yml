@@ -23,8 +23,10 @@ jobs:
       - name: Install Minifier
         run: wget https://raw.githubusercontent.com/stravant/lua-minify/master/minify.lua
         
-      - name: Minify Movescript
-        run: lua minify.lua minify src/movescript.lua > min/movescript.lua
+      - name: Minify Scripts
+        run: |
+          touch min/movescript.lua
+          lua minify.lua minify src/movescript.lua > min/movescript.lua
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4

@@ -106,11 +106,11 @@ local function convertToFilter(var)
     if type(var) == "table" and #var > 0 and type(var[1]) == "string" then
         local filters = {}
         for _, expr in pairs(var) do
-            table.insert(filters, parseFilterExpression(expr))
+            table.insert(filters, parseItemFilterExpression(expr))
         end
         return orFilter(filters)
     elseif type(var) == "string" then
-        return parseFilterExpression(var)
+        return parseItemFilterExpression(var)
     elseif type(var) == "function" then
         return var
     else

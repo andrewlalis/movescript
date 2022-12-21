@@ -56,7 +56,8 @@ module.exports = {
           children: [
             '',
             'spec',
-            'settings'
+            'settings',
+            'reference'
           ]
         }
       ]

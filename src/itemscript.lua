@@ -12,7 +12,9 @@ local t = turtle
 -- The itemscript module. Functions defined within this table are exported.
 local itemscript = {}
 
-local function itemStackMatches(itemStack, name, fuzzy)
+-- Determines if an item stack matches the given name.
+-- If fuzzy, then the item name will be matched against the given name.
+local function stackMatches(itemStack, name, fuzzy)
     return itemStack ~= nil and
         (
             (not fuzzy and itemStack.name == name) or
@@ -20,14 +22,66 @@ local function itemStackMatches(itemStack, name, fuzzy)
         )
 end
 
+--[[
+The following describes an item filter:
+A table containing a filter mechanism.
+{
+    filterFunction = stackMatches,
+    fuzzy = false,
+    whitelist = true
+}
+The filterFunction is defined like so:
+function filterFunction(item, filter)
+    return true | false
+end
+]]--
+
+local function makeItemFilter(var, fuzzy, whitelist)
+    local filter = {
+        filterFunction = nil,
+        fuzzy = fuzzy or false,
+        whitelist = whitelist
+    }
+    if type(var) == "string" then
+        -- If the filter is a single item name, define a single-item filter that matches against the name.
+        filter.filterFunction = function (item, filter)
+            local matches = stackMatches(item, var, filter.fuzzy)
+            if filter.whitelist then
+                return matches
+            else
+                return not matches
+            end
+        end
+    elseif type(var) == "table" then
+        -- If the filter is a list of item names, define a multi-item filter.
+        filter.filterFunction = function (item, filter)
+            for _, itemName in pairs(var) do
+                if filter.whitelist and stackMatches(item, itemName, filter.fuzzy) then
+                    return true
+                elseif not filter.whitelist and not stackMatches(item, itemName, filter.fuzzy) then
+                    return false
+                end
+            end
+            -- If whitelist and we couldn't find a match, return false.
+            -- If blacklist and we couldn't find a non-match, return true.
+            return not filter.whitelist
+        end
+    elseif type(var) == "function" then
+        -- Otherwise, just use the provided filter.
+        filter.filterFunction = var
+    end
+    filter.apply = function(item)
+        return filter.filterFunction(item, filter)
+    end
+    return filter
+end
+
 -- Gets the total number of items of a certain type in the turtle's inventory.
--- If fuzzy is set as true, then it'll match substrings matching the given name.
-function itemscript.totalCount(name, fuzzy)
-    fuzzy = fuzzy or false
+function itemscript.totalCount(filter)
     local count = 0
     for i = 1, 16 do
         local item = t.getItemDetail(i)
-        if itemStackMatches(item, name, fuzzy) then
+        if filter.apply(item) then
             count = count + item.count
         end
     end
@@ -36,11 +90,10 @@ end
 
 -- Selects a slot containing at least one of the given item type.
 -- Returns a boolean indicating whether we could find and select the item.
-function itemscript.select(name, fuzzy)
-    fuzzy = fuzzy or false
+function itemscript.select(filter)
     for i = 1, 16 do
         local item = t.getItemDetail(i)
-        if itemStackMatches(item, name, fuzzy) then
+        if filter.apply(item) then
             t.select(i)
             return true
         end
@@ -48,43 +101,27 @@ function itemscript.select(name, fuzzy)
     return false
 end
 
-local function itemMatchesFilter(item, name, fuzzy)
-    fuzzy = fuzzy or false
-    return (not fuzzy and item.name == name) or string.find(item.name, name)
-end
-
-local function itemNotMatchesFilter(item, name, fuzzy)
-    return not itemMatchesFilter(item, name, fuzzy)
-end
-
-local function dropFiltered(name, fuzzy, dropFunction, filterFunction)
+-- Helper function to drop items in a flexible way, using a drop function and filtering function.
+local function dropFiltered(dropFunction, filter)
     for i = 1, 16 do
         local item = t.getItemDetail(i)
-        if filterFunction(item, name, fuzzy) then
+        if filter.apply(item) then
             t.select(i)
             dropFunction()
         end
     end
 end
 
-function itemscript.dropAll(name, fuzzy)
-    dropFiltered(name, fuzzy or false, t.drop, itemMatchesFilter)
+function itemscript.dropAll(filter)
+    dropFiltered(t.drop, filter)
 end
 
-function itemscript.dropAllDown(name, fuzzy)
-    dropFiltered(name, fuzzy or false, t.dropDown, itemMatchesFilter)
+function itemscript.dropAllDown(filter)
+    dropFiltered(t.dropDown, filter)
 end
 
-function itemscript.dropAllUp(name, fuzzy)
-    dropFiltered(name, fuzzy or false, t.dropUp, itemMatchesFilter)
-end
-
-function itemscript.dropAllExcept(name, fuzzy)
-    dropFiltered(name, fuzzy or false, t.drop, itemNotMatchesFilter)
-end
-
-function itemscript.dropAllDownExcept(name, fuzzy)
-    dropFiltered(name, fuzzy or false, t.dropDown, itemNotMatchesFilter)
+function itemscript.dropAllUp(filter)
+    dropFiltered(t.dropUp, filter)
 end
 
 -- Cleans up the turtle's inventory by compacting all stacks of items.

@@ -198,4 +198,11 @@ function movescript.run(script, settings)
     end
 end
 
+function movescript.runFile(filename, settings)
+    local f = fs.open(filename, "r")
+    local script = f.readAll()
+    f.close()
+    movescript.run(script, settings)
+end
+
 return movescript

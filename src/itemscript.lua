@@ -73,7 +73,7 @@ end
     Prepending # will do a fuzzy match using string.find.
 ]]--
 local function parseItemFilterExpression(expr)
-    local prefixIdx, prefixIdxEnd = string.find(expr, "^[!#]*")
+    local prefixIdx, prefixIdxEnd = string.find(expr, "^[!#]+")
     local fuzzy = false
     local negated = false
     if prefixIdx ~= nil then

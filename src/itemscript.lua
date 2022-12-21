@@ -66,9 +66,10 @@ local function parseItemFilterExpression(expr)
     local negated = false
     if prefixIdx ~= nil then
         for i = prefixIdx, prefixIdxEnd do
-            if expr[i] == "!" then
+            local char = string.sub(expr, i, i)
+            if char == "!" then
                 negated = true
-            elseif expr[i] == "#" then
+            elseif char == "#" then
                 fuzzy = true
             end
         end

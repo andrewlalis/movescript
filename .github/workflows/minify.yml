@@ -29,8 +29,8 @@ jobs:
         run: |
           rm -rf min
           mkdir min
-          touch min/movescript.lua
           lua minify.lua minify src/movescript.lua > min/movescript.lua
+          lua minify.lua minify src/itemscript.lua > min/itemscript.lua
           
       - name: Clean Up Repository
         run: |

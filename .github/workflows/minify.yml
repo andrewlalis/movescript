@@ -25,6 +25,8 @@ jobs:
         
       - name: Minify Scripts
         run: |
+          rm -rf min
+          mkdir min
           touch min/movescript.lua
           lua minify.lua minify src/movescript.lua > min/movescript.lua
 

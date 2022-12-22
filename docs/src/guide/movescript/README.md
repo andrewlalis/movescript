@@ -7,7 +7,7 @@ The Movescript module provides a simple interface for executing *movescript sour
 To install this module, run the following command from your turtle's console:
 
 ```shell
-wget https://raw.githubusercontent.com/andrewlalis/movescript/main/min/movescript.lua
+wget https://andrewlalis.github.io/movescript/scripts/movescript.lua
 ```
 
 And then use it in a script:

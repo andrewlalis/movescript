@@ -7,7 +7,7 @@ The Itemscript module provides a flexible, powerful interface for managing a tur
 To install this module, run the following command from your turtle's console:
 
 ```shell
-wget https://raw.githubusercontent.com/andrewlalis/movescript/main/min/itemscript.lua
+wget https://andrewlalis.github.io/movescript/scripts/itemscript.lua
 ```
 
 And then use it in a script:

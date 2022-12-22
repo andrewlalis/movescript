@@ -143,7 +143,7 @@ local function refuelToAtLeast(requiredLevel, settings)
         local fuelUpdated = false
         while not fuelUpdated do
             os.pullEvent("turtle_inventory")
-            fuelUpdated = refuelAll()
+            fuelUpdated = refuelAll(settings)
         end
     end
 end

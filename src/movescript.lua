@@ -207,4 +207,8 @@ function movescript.runFile(filename, settings)
     movescript.run(script, settings)
 end
 
+function movescript.validate(script, settings)
+    return pcall(function () parseScript(script, settings) end)
+end
+
 return movescript

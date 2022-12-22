@@ -115,11 +115,13 @@ local function refuelAll(settings)
     local refueled = false
     for slot = 1, 16 do
         local item = t.getItemDetail(slot)
-        for _, fuelName in pairs(fuels) do
-            if item.name == fuelName then
-                t.select(i)
-                if t.refuel(item.count) then refueled = true end
-                break
+        if item ~= nil then
+            for _, fuelName in pairs(fuels) do
+                if item.name == fuelName then
+                    t.select(i)
+                    if t.refuel(item.count) then refueled = true end
+                    break
+                end
             end
         end
     end

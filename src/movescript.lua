@@ -131,7 +131,7 @@ end
 -- Blocks until the turtle's fuel level is at least at the required level.
 local function refuelToAtLeast(requiredLevel, settings)
     refuelAll(settings)
-    while t.getFuelLevel < requiredLevel do
+    while t.getFuelLevel() < requiredLevel do
         print(
             "[MS] Fuel level is too low. Level: " .. t.getFuelLevel() .. ". Required: " .. requiredLevel ..
             ". Please add some of the following fuels:"

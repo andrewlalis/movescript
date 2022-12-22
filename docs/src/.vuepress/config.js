@@ -81,5 +81,11 @@ module.exports = {
   plugins: [
     '@vuepress/plugin-back-to-top',
     '@vuepress/plugin-medium-zoom',
+    ['vuepress-plugin-code-copy', {
+      backgroundTransition: false,
+      staticIcon: false,
+      color: '#de9502',
+      successText: 'Copied to clipboard.'
+    }]
   ]
 }

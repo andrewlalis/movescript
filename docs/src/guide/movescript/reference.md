@@ -7,6 +7,10 @@ local ms = require("movescript")
 ms.run("2F")
 ```
 
+## `parse(script, settings)`
+
+Parses the given `script` string and returns a table containing the parsed instructions to be executed. This is mostly useful for debugging your scripts.
+
 ## `run(script, settings)`
 
 Runs the given `script` string as a movescript, and optionally a `settings` table can be provided. Otherwise, [default settings](settings.md) will be used.

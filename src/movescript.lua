@@ -10,6 +10,10 @@ that you don't need to get tired of typing "turtle.forward()" over and over.
 VERSION = "0.0.1"
 
 local t = turtle
+-- For testing purposes, if the turtle API is not present, we inject our own.
+if not t then t = {
+    getFuelLimit = function() return 1000000000 end
+} end
 
 -- The movescript module. Functions defined within this table are exported.
 local movescript = {}
@@ -167,25 +171,121 @@ local function executeInstruction(instruction, settings)
     end
 end
 
+local INSTRUCTION_TYPES = {
+    repeated = 1,
+    instruction = 2
+}
+
+local function parseInstructionOptions(text, settings)
+    local idx, endIdx = string.find(text, "%b()")
+    if idx == nil or endIdx - idx < 4 then return nil end
+    local optionPairsText = string.sub(text, idx, endIdx)
+    debug("Parsing instruction options: " .. optionPairsText, settings)
+    local options = {}
+    local nextIdx = 1
+    while nextIdx < string.len(optionPairsText) do
+        idx, endIdx = string.find(optionPairsText, "%w+=[%w_-%.]+", nextIdx)
+        if idx == nil then break end
+        local pairText = string.sub(optionPairsText, idx, endIdx)
+        local keyIdx, keyEndIdx = string.find(pairText, "%w+")
+        local key = string.sub(pairText, keyIdx, keyEndIdx)
+        local valueIdx, valueEndIdx = string.find(pairText, "[%w_-%.]+", keyEndIdx + 2)
+        local value = string.sub(pairText, valueIdx, valueEndIdx)
+        options[key] = value
+        debug("  Found option: key = " .. key .. ", value = " .. value, settings)
+        nextIdx = endIdx + 2
+    end
+    return options
+end
+
+local function parseRepeatedInstruction(match, settings)
+    debug("Parsing repeated instruction: " .. match, settings)
+    local instruction = {}
+    instruction.type = INSTRUCTION_TYPES.repeated
+    local countIdx, countEndIdx = string.find(match, "%d+")
+    instruction.count = tonumber(string.sub(match, countIdx, countEndIdx))
+    if instruction.count < 0 then
+        error("Repeated instruction cannot have a negative count.")
+    end
+    local innerScriptIdx, innerScriptEndIdx = string.find(match, "%b()", countEndIdx + 1)
+    local innerScript = string.sub(match, innerScriptIdx + 1, innerScriptEndIdx - 1)
+    instruction.instructions = movescript.parse(innerScript, settings)
+    return instruction
+end
+
+local function parseInstruction(match, settings)
+    debug("Parsing instruction: " .. match, settings)
+    local instruction = {}
+    instruction.type = INSTRUCTION_TYPES.instruction
+    local countIdx, countEndIdx = string.find(match, "%d+")
+    instruction.count = 1
+    if countIdx ~= nil then
+        instruction.count = tonumber(string.sub(match, countIdx, countEndIdx))
+    end
+    if instruction.count < 1 or instruction.count > t.getFuelLimit() then
+        error("Instruction at index " .. actionIdx .. " has an invalid count of " .. instruction.count .. ". It should be >= 1 and <= " .. t.getFuelLimit())
+    end
+    local actionIdx, actionEndIdx = string.find(match, "%u%l*")
+    instruction.action = string.sub(match, actionIdx, actionEndIdx)
+    if actionMap[instruction.action] == nil then
+        error("Instruction at index " .. actionIdx .. ", \"" .. instruction.action .. "\", does not refer to a valid action.")
+    end
+    return instruction
+end
+
 -- Parses a movescript script into a series of instruction tables.
-local function parseScript(script, settings)
+--[[
+    Movescript Grammar:
+block:                instruction | repeatedInstructions
+
+repeatedInstructions: count '(' {instruction | repeatedInstructions} ')'
+  regex: %d+%s*%b()
+instruction:          [count] action [actionOptions] <- Not yet implemented.
+  regex: %d*%u%l*
+count:                %d+
+
+action:               %u%l*
+
+actionOptions:        '(' {optionPair ','} ')'
+  regex: %b()
+
+optionPair:           optionKey '=' optionValue
+
+optionKey:            %w+
+
+optionValue:          [%w_-]+
+
+]]--
+function movescript.parse(script, settings)
     local instructions = {}
-    for instruction in string.gfind(script, "%W*(%d*%u%l*)%W*") do
-        local countIdx, countIdxEnd = string.find(instruction, "%d+")
-        local actionIdx, actionIdxEnd = string.find(instruction, "%u%l*")
-        local count = 1
-        if countIdx ~= nil then
-            count = tonumber(string.sub(instruction, countIdx, countIdxEnd))
+    local scriptIdx = 1
+    while scriptIdx <= string.len(script) do
+        local instruction = {}
+        local repeatedMatchStartIdx, repeatedMatchEndIdx = string.find(script, "%d+%s*%b()", scriptIdx)
+        local instructionMatchStartIdx, instructionMatchEndIdx = string.find(script, "%d*%u%l*", scriptIdx)
+        -- Parse the first occurring matched pattern.
+        if repeatedMatchStartIdx ~= nil and (instructionMatchStartIdx == nil or repeatedMatchStartIdx < instructionMatchStartIdx) then
+            -- Parse repeated instructions.
+            local match = string.sub(script, repeatedMatchStartIdx, repeatedMatchEndIdx)
+            table.insert(instructions, parseRepeatedInstruction(match, settings))
+            scriptIdx = repeatedMatchEndIdx + 1
+        elseif instructionMatchStartIdx ~= nil and (repeatedMatchStartIdx == nil or instructionMatchStartIdx < repeatedMatchStartIdx) then
+            -- Parse single instruction.
+            local match = string.sub(script, instructionMatchStartIdx, instructionMatchEndIdx)
+            local instruction = parseInstruction(match, settings)
+            local optionsIdx, optionsEndIdx = string.find(script, "%s*%b()", instructionMatchEndIdx + 1)
+            if optionsIdx ~= nil then
+                -- Check that there's nothing but empty space between the instruction and the options text.
+                if not string.find(string.sub(script, instructionMatchEndIdx + 1, optionsIdx - 1), "%S+") then
+                    local optionsText = string.sub(script, optionsIdx, optionsEndIdx)
+                    instruction.options = parseInstructionOptions(optionsText, settings)
+                end
+            end
+            table.insert(instructions, instruction)
+            scriptIdx = instructionMatchEndIdx + 1
+        else
+            error("Invalid script characters found at index " .. scriptIdx)
         end
-        local action = string.sub(instruction, actionIdx, actionIdxEnd)
-        if count < 1 or count > t.getFuelLimit() then
-            error("Instruction at index " .. actionIdx .. " has an invalid count of " .. count .. ". It should be >= 1 and <= " .. t.getFuelLimit())
-        end
-        if actionMap[action] == nil then
-            error("Instruction at index " .. actionIdx .. ", \"" .. action .. "\", does not refer to a valid action.")
-        end
-        table.insert(instructions, {action = action, count = count})
-        debug("Parsed instruction: " .. instruction, settings)
     end
     return instructions
 end
@@ -194,7 +294,7 @@ function movescript.run(script, settings)
     settings = settings or movescript.defaultSettings
     script = script or ""
     debug("Executing script: " .. script, settings)
-    local instructions = parseScript(script, settings)
+    local instructions = movescript.parse(script, settings)
     for idx, instruction in pairs(instructions) do
         executeInstruction(instruction, settings)
     end
@@ -208,7 +308,7 @@ function movescript.runFile(filename, settings)
 end
 
 function movescript.validate(script, settings)
-    return pcall(function () parseScript(script, settings) end)
+    return pcall(function () movescript.parse(script, settings) end)
 end
 
 return movescript

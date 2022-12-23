@@ -22,33 +22,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-# Disabled minification for now.   
-      # - name: Install Lua
-      #   uses: ljmf00/setup-lua@v1.0.0
-      #   with:
-      #     lua-version: 5.3
-      #     install-luarocks: true
-        
-      # - name: Minify Scripts
-      #   run: |
-      #     script_dir=docs/src/.vuepress/public/scripts
-      #     rm -rf $script_dir
-      #     mkdir $script_dir
-      #     lua minify.lua minify src/movescript.lua > $script_dir/movescript.lua
-      #     lua minify.lua minify src/itemscript.lua > $script_dir/itemscript.lua
-          
-      # - name: Clean Up Lua Artifacts
-      #   run: |
-      #     rm -rf .lua
-      #     rm -rf .luarocks
-      #     rm -rf .source
-
       - name: Copy scripts to Docs public assets
         run: |
           script_dir=docs/src/.vuepress/public/scripts
           rm -rf $script_dir
           mkdir $script_dir
           cp src/* $script_dir/
+
+      - name: Install Lua
+        uses: ljmf00/setup-lua@v1.0.0
+        with:
+          lua-version: 5.3
+          install-luarocks: true
+        
+      - name: Minify Scripts
+        run: |
+          script_dir=docs/src/.vuepress/public/scripts
+          lua minify.lua minify src/movescript.lua > $script_dir/movescript-min.lua
+          lua minify.lua minify src/itemscript.lua > $script_dir/itemscript-min.lua
+          
+      - name: Clean Up Lua Artifacts
+        run: |
+          rm -rf .lua
+          rm -rf .luarocks
+          rm -rf .source
 
       - name: Setup Node
         uses: actions/setup-node@v3

@@ -118,7 +118,7 @@ local function refuelAll(settings)
         if item ~= nil then
             for _, fuelName in pairs(fuels) do
                 if item.name == fuelName then
-                    t.select(i)
+                    t.select(slot)
                     if t.refuel(item.count) then refueled = true end
                     break
                 end

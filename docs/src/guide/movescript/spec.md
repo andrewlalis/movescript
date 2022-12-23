@@ -31,20 +31,32 @@ For example: `22(AF)` - We execute the instructions `A` and `F` 22 times.
 
 The following table lists all actions that are available in Movescript. Attempting to invoke an action not listed here will result in an error that will terminate your script.
 
-| Action | Description                                      | Needs Fuel |
-| ------ | ------------------------------------------------ | ---------- |
-| `U`    | Move up.                                         | ✅         |
-| `D`    | Move down.                                       | ✅         |
-| `L`    | Turn left.                                       | ❌         |
-| `R`    | Turn right.                                      | ❌         |
-| `F`    | Move forward.                                    | ✅         |
-| `B`    | Move backward.                                   | ✅         |
-| `P`    | Place the selected item in front of the turtle.  | ❌         |
-| `Pu`   | Place the selected item above the turtle.        | ❌         |
-| `Pd`   | Place the selected item below the turtle.        | ❌         |
-| `A`    | Attack in front of the turtle.                   | ❌         |
-| `Au`   | Attack above the turtle.                         | ❌         |
-| `Ad`   | Attack below the turtle.                         | ❌         |
+| Action | Description                                      | Options                                    |
+| ------ | ------------------------------------------------ | ------------------------------------------ |
+| `U`    | Move up.                                         |
+| `D`    | Move down.                                       |
+| `L`    | Turn left.                                       |
+| `R`    | Turn right.                                      |
+| `F`    | Move forward.                                    |
+| `B`    | Move backward.                                   |
+| `P`    | Place the selected item in front of the turtle.  | `text: string` - Text to use if placing a sign. |
+| `Pu`   | Place the selected item above the turtle.        | `text: string` - Text to use if placing a sign. |
+| `Pd`   | Place the selected item below the turtle.        | `text: string` - Text to use if placing a sign. |
+| `A`    | Attack in front of the turtle.                   | `side: string` - The tool side to use (left or right). |
+| `Au`   | Attack above the turtle.                         | `side: string` - The tool side to use (left or right). |
+| `Ad`   | Attack below the turtle.                         | `side: string` - The tool side to use (left or right). |
+| `Dg`   | Dig in front of the turtle.                      | `side: string` - The tool side to use (left or right). |
+| `Dgu`  | Dig above the turtle.                            | `side: string` - The tool side to use (left or right). |
+| `Dgd`  | Dig below the turtle.                            | `side: string` - The tool side to use (left or right). |
+| `S`    | Suck items from in front of the turtle.          | `count: number` - The number of items to suck. |
+| `Su`   | Suck items from above the turtle.                | `count: number` - The number of items to suck. |
+| `Sd`   | Suck items from below the turtle.                | `count: number` - The number of items to suck. |
+| `Eqr`  | Equip the selected item to the right side.       |
+| `Eql`  | Equip the selected item to the left side.        |
+| `Sel`  | Selects slot 1, or the specified slot.           | `slot: number` - The slot to select. |
+| `Dr`   | Drops the selected items in front of the turtle. | `count: number` - The number of items to drop. |
+| `Dru`  | Drops the selected items above the turtle.       | `count: number` - The number of items to drop. |
+| `Drd`  | Drops the selected items below the turtle.       | `count: number` - The number of items to drop. |
 
 For example, if we want our turtle to go forward 3 times, instead of writing `turtle.forward()` 3 times, we can just do the following:
 
@@ -67,6 +79,6 @@ The following snippets show a few example scripts, along with a description of w
 
 `3F2U1L` - Move forward 3 blocks, then up 2 blocks, and turn left.
 
-`B2RAd` - Move back 2 blocks, then turn right twice, and then attack downward.
+`B2RAd` - Move back, then turn right twice, and then attack downward.
 
 

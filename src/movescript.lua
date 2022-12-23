@@ -66,34 +66,142 @@ local function goDirection(dirFunction, digFunction, detectFunction, settings)
     end
 end
 
-local function goUp(settings)
+local function goUp(options, settings)
     debug("Moving up.", settings)
     goDirection(t.up, t.digUp, t.detectUp, settings)
 end
 
-local function goDown(settings)
+local function goDown(options, settings)
     debug("Moving down.", settings)
     goDirection(t.down, t.digDown, t.detectDown, settings)
 end
 
-local function goForward(settings)
+local function goForward(options, settings)
     debug("Moving forward.", settings)
     goDirection(t.forward, t.dig, t.detect, settings)
 end
 
-local function goBack(settings)
+local function goBack(options, settings)
     debug("Moving back.", settings)
     goDirection(t.back, t.digBack, t.detectBack, settings)
 end
 
-local function goRight(settings)
+local function goRight(options, settings)
     debug("Turning right.", settings)
     t.turnRight()
 end
 
-local function goLeft(settings)
+local function goLeft(options, settings)
     debug("Turning left.", settings)
     t.turnLeft()
+end
+
+local function place(options, settings)
+    debug("Placing.", settings)
+    t.place(options.text)
+end
+
+local function placeUp(options, settings)
+    debug("Placing up.", settings)
+    t.placeUp(options.text)
+end
+
+local function placeDown(options, settings)
+    debug("Placing down.", settings)
+    t.placeDown(options.text)
+end
+
+local function attack(options, settings)
+    debug("Attacking.", settings)
+    t.attack(options.side)
+end
+
+local function attackUp(options, settings)
+    debug("Attacking up.", settings)
+    t.attackUp(options.side)
+end
+
+local function attackDown(options, settings)
+    debug("Attacking down.", settings)
+    t.attackDown(options.side)
+end
+
+local function dig(options, settings)
+    debug("Digging.", settings)
+    t.dig(options.side)
+end
+
+local function digUp(options, settings)
+    debug("Digging up.", settings)
+    t.digUp(options.side)
+end
+
+local function digDown(options, settings)
+    debug("Digging down.", settings)
+    t.digDown(options.side)
+end
+
+local function suck(options, settings)
+    debug("Sucking.", settings)
+    local count = nil
+    if options.count ~= nil then
+        count = tonumber(options.count)
+    end
+    t.suck(count)
+end
+
+local function suckUp(options, settings)
+    debug("Sucking up.", settings)
+    local count = nil
+    if options.count ~= nil then
+        count = tonumber(options.count)
+    end
+    t.suckUp(count)
+end
+
+local function suckDown(options, settings)
+    debug("Sucking down.", settings)
+    local count = nil
+    if options.count ~= nil then
+        count = tonumber(options.count)
+    end
+    t.suckDown(count)
+end
+
+local function selectSlot(options, settings)
+    local slot = 1
+    if options.slot ~= nil then
+        slot = tonumber(options.slot)
+    end
+    debug("Selecting slot " .. slot .. ".", settings)
+    t.select(slot)
+end
+
+local function drop(options, settings)
+    debug("Dropping.", settings)
+    local count = nil
+    if options.count ~= nil then
+        count = tonumber(options.count)
+    end
+    t.drop(count)
+end
+
+local function dropUp(options, settings)
+    debug("Dropping up.", settings)
+    local count = nil
+    if options.count ~= nil then
+        count = tonumber(options.count)
+    end
+    t.dropUp(count)
+end
+
+local function dropDown(options, settings)
+    debug("Dropping down.", settings)
+    local count = nil
+    if options.count ~= nil then
+        count = tonumber(options.count)
+    end
+    t.dropDown(count)
 end
 
 local actionMap = {
@@ -103,12 +211,24 @@ local actionMap = {
     ["R"] = {f = goRight, needsFuel = false},
     ["F"] = {f = goForward, needsFuel = true},
     ["B"] = {f = goBack, needsFuel = true},
-    ["P"] = {f = t.place, needsFuel = false},
-    ["Pu"] = {f = t.placeUp, needsFuel = false},
-    ["Pd"] = {f = t.placeDown, needsFuel = false},
-    ["A"] = {f = t.attack, needsFuel = false},
-    ["Au"] = {f = t.attackUp, needsFuel = false},
-    ["Ad"] = {f = t.attackDown, needsFuel = false}
+    ["P"] = {f = place, needsFuel = false},
+    ["Pu"] = {f = placeUp, needsFuel = false},
+    ["Pd"] = {f = placeDown, needsFuel = false},
+    ["A"] = {f = attack, needsFuel = false},
+    ["Au"] = {f = attackUp, needsFuel = false},
+    ["Ad"] = {f = attackDown, needsFuel = false},
+    ["Dg"] = {f = dig, needsFuel = false},
+    ["Dgu"] = {f = digUp, needsFuel = false},
+    ["Dgd"] = {f = digDown, needsFuel = false},
+    ["S"] = {f = suck, needsFuel = false},
+    ["Su"] = {f = suckUp, needsFuel = false},
+    ["Sd"] = {f = suckDown, needsFuel = false},
+    ["Eqr"] = {f = t.equipRight, needsFuel = false},
+    ["Eql"] = {f = t.equipLeft, needsFuel = false},
+    ["Sel"] = {f = selectSlot, needsFuel = false},
+    ["Dr"] = {f = drop, needsFuel = false},
+    ["Dru"] = {f = dropUp, needsFuel = false},
+    ["Drd"] = {f = dropDown, needsFuel = false}
 }
 
 -- Tries to refuel the turtle from all slots that contain a valid fuel.
@@ -155,19 +275,30 @@ end
 -- Executes a single instruction. An instruction is a table with an "action"
 -- and some attributes, such as if it needs fuel or not.
 local function executeInstruction(instruction, settings)
-    local action = actionMap[instruction.action]
-    if action then
-        debug("Executing action \"" .. instruction.action .. "\" " .. instruction.count .. " times.", settings)
-        local shouldRefuel = (
-            (settings.safe or true) and
-            (action.needsFuel) and
-            (instruction.count > t.getFuelLevel())
-        )
-        if shouldRefuel then
-            local fuelRequired = instruction.count
-            refuelToAtLeast(fuelRequired, settings)
+    if instruction.type == INSTRUCTION_TYPES.repeated then
+        debug("Executing repeated instruction " .. instruction.count .. " times.", settings)
+        for i = 1, instruction.count do
+            for _, nestedInstruction in pairs(instruction.instructions) do
+                executeInstruction(nestedInstruction, settings)
+            end
         end
-        for i = 1, instruction.count do action.f() end
+    elseif instruction.type == INSTRUCTION_TYPES.instruction then
+        local action = actionMap[instruction.action]
+        if action then
+            debug("Executing action \"" .. instruction.action .. "\" " .. instruction.count .. " times.", settings)
+            local shouldRefuel = (
+                (settings.safe or true) and
+                (action.needsFuel) and
+                (instruction.count > t.getFuelLevel())
+            )
+            if shouldRefuel then
+                local fuelRequired = instruction.count
+                refuelToAtLeast(fuelRequired, settings)
+            end
+            for i = 1, instruction.count do
+                action.f(instruction.options, settings)
+            end
+        end
     end
 end
 
@@ -281,6 +412,7 @@ function movescript.parse(script, settings)
                     instruction.options = parseInstructionOptions(optionsText, settings)
                 end
             end
+            if instruction.options == nil then instruction.options = {} end
             table.insert(instructions, instruction)
             scriptIdx = instructionMatchEndIdx + 1
         else

@@ -25,6 +25,11 @@ movescript.defaultSettings = {
     fuels = {"minecraft:coal", "minecraft:charcoal"}
 }
 
+local INSTRUCTION_TYPES = {
+    repeated = 1,
+    instruction = 2
+}
+
 local function debug(msg, settings)
     if settings and settings.debug then
         print("[MS] " .. msg)
@@ -301,11 +306,6 @@ local function executeInstruction(instruction, settings)
         end
     end
 end
-
-local INSTRUCTION_TYPES = {
-    repeated = 1,
-    instruction = 2
-}
 
 local function parseInstructionOptions(text, settings)
     local idx, endIdx = string.find(text, "%b()")

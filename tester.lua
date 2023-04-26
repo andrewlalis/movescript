@@ -21,5 +21,15 @@ function print_r (t, name, indent)
     table_r(t,name or '__unnamed__',indent or '','')
   end
 
-local ms = require("src/movescript")
-print_r(ms.parse("35(2F(safe=false)R 3(L(delay=0.25, file=file.txt)UB))", {debug=true}))
+-- local ms = require("src/movescript")
+-- print_r(ms.parse("35(2F(safe=false)R 3(L(delay=0.25, file=file.txt)UB))", {debug=true}))
+
+local bs = require("src/buildscript")
+local args = {...}
+local spec = {
+  num = { type = "number", required = true, idx = 1 },
+  name = { name = "name", type = "bool", required = true }
+}
+local success, result = bs.parseArgs(args, spec)
+print(success)
+print_r(result)

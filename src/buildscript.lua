@@ -22,67 +22,94 @@ function buildscript.runWithItem(ms_script, filterExpr)
     end
 end
 
-local function parseArgValue(argSpec, str)
-
+-- Parses a value for an argument specification from a raw value.
+local function parseArgValue(argSpec, arg)
+    if argSpec.required and (not arg or #arg < 1) then
+        return false, "Missing required value."
+    end
+    if argSpec.type == "string" then
+        return true, arg
+    elseif argSpec.type == "number" then
+        local num = tonumber(arg)
+        if not num and argSpec.required then
+            return false, "Invalid number."
+        end
+        return true, num
+    elseif argSpec.type == "bool" then
+        local txt = string.lower(arg)
+        if txt == "true" or txt == "t" or txt == "yes" or txt == "y" then
+            return true, true
+        else
+            return true, false
+        end
+    else
+        return false, "Unknown type: " .. argSpec.type
+    end
 end
 
 -- Parses arguments according to a specification table, for common building
 -- scripts, and returns a table with key-value pairs for each arg.
 -- The specification table should be formatted like so:
 -- {
---   argName = { type = "string", required = true, idx = 1 }
+--   argName = { type = "string", required = true, idx = 1 },
+--   namedArg = { name = "-f", required = true, type = "bool" }
 -- }
+-- Supported types: string, number, bool
 function buildscript.parseArgs(args, spec)
-    local idxArgSpecs = {}
-    local namedArgSpecs = {}
     for name, argSpec in pairs(spec) do
         if argSpec.idx ~= nil then
-            -- Add this argSpec to the list of indexed arg specs for parsing first.
-            if type(argSpec.idx) ~= "number" or argSpec.idx < 1 do
+            if type(argSpec.idx) ~= "number" or argSpec.idx < 1 then
                 return false, "Invalid argument specification: " .. name .. " does not have a valid numeric index."
             end
-            idxArgSpecs[name] = argSpec
         elseif argSpec.name ~= nil then
-            -- Otherwise, ensure that this argSpec has a name.
-            if type(argSpec.name) ~= "string" or #argSpec.name < 3 do
+            if type(argSpec.name) ~= "string" or #argSpec.name < 3 then
                 return false, "Invalid argument specification: " .. name .. " does not have a valid string name."
             end
-            namedArgSpecs[name] = argSpec
         else
             return false, "Invalid argument specification: " .. name .. " doesn't have idx or name."
         end
+        if not argSpec.type then argSpec.type = "string" end
     end
 
     local results = {}
-    local idx = 1
-    while idx <= #args do
-        local parsed = false
-        -- Try and see if there's an idx arg spec for this index first.
-        for name, argSpec in pairs(idxArgSpecs) do
-            if argSpec.idx == idx then
-                local success, value = parseArgValue(argSpec, args[idx])
-                if success then
+
+    -- Iterate over each argument specification, and try and find a value for it.
+    for name, argSpec in pairs(spec) do
+        if argSpec.idx then
+            -- Parse a positional argument.
+            if argSpec.idx > #args and argSpec.required then
+                return false, "Missing required positional argument " .. name .. " at index " .. argSpec.idx
+            end
+            if argSpec.idx > #args then
+                results[name] = nil
+            else
+                local success, value = parseArgValue(argSpec, args[argSpec.idx])
+                if not success then
+                    return false, "Failed to parse value for argument " .. name .. ": " .. value
+                end
+                results[name] = value
+            end
+        else
+            -- Parse a named argument by iterating over all args until we find one matching the name.
+            local valueFound = false
+            for idx, arg in pairs(args) do
+                if arg == argSpec.name then
+                    if idx >= #args and argSpec.required then
+                        return false, "Missing value for required argument " .. name
+                    end
+                    local success, value = parseArgValue(argSpec, args[idx + 1])
+                    if not success then
+                        return false, "Failed to parse value for argument " .. name .. ": " .. value
+                    end
                     results[name] = value
-                    idxArgSpecs[name] = nil
-                    parsed = true
+                    valueFound = true
                     break
-                elseif not success and argSpec.required then
-                    return false, "Failed to parse value for " .. name .. " argument: " .. value
                 end
             end
-        end
-
-        -- If no idx arg spec could parse the argument, try a named one.
-        if not parsed then
-            if idx == #args then
-                return false, "Missing value for argument " .. args[idx]
-            end
-            for name, argSpec in pairs(idxArgSpecs) do
-                
+            if argSpec.required and not valueFound then
+                return false, "Missing argument: " .. name
             end
         end
-
-        idx = idx + 1
     end
 
     return true, results

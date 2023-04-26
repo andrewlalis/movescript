@@ -59,6 +59,12 @@ end
 
     Prepending ! will match any item stack whose name does not match.
     Prepending # will do a fuzzy match using string.find.
+
+    Examples:
+
+    "coal" matches only "minecraft:coal" items
+    "!#wood" matches all items except any that contain the phrase "wood"
+    "#iron" matches all items that contain the phrase "iron"
 ]]--
 local function parseItemFilterExpression(expr)
     local prefixIdx, prefixIdxEnd = string.find(expr, "^[!#]+")
@@ -137,11 +143,12 @@ function itemscript.select(filterExpr)
     return false
 end
 
--- Selects a slot containing at least one of the given item type, or waits for
--- the user to add an item otherwise.
-function itemscript.selectOrWait(filterExpr)
-    while not itemscript.select(filterExpr) do
-        print("Couldn't find at least one item matching the filter expression: \"" .. filterExpr .. "\". Please add it.")
+-- Selects a slot containing at least minCount (or 1) of an item type matching
+-- the given filter expression.
+function itemscript.selectOrWait(filterExpr, minCount)
+    minCount = minCount or 1
+    while itemscript.totalCount(filterExpr) < minCount do
+        print("Couldn't find at least " .. minCount .. " item(s) matching the filter expression: \"" .. filterExpr .. "\". Please add it.")
         os.pullEvent("turtle_inventory")
     end
 end

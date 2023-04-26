@@ -137,6 +137,15 @@ function itemscript.select(filterExpr)
     return false
 end
 
+-- Selects a slot containing at least one of the given item type, or waits for
+-- the user to add an item otherwise.
+function itemscript.selectOrWait(filterExpr)
+    while not itemscript.select(filterExpr) do
+        print("Couldn't find at least one item matching the filter expression: \"" .. filterExpr .. "\". Please add it.")
+        os.pullEvent("turtle_inventory")
+    end
+end
+
 -- Helper function to drop items in a flexible way, using a drop function and filtering function.
 local function dropFiltered(dropFunction, filter)
     for i = 1, 16 do

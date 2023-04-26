@@ -279,12 +279,12 @@ end
 
 -- Executes a single instruction. An instruction is a table with an "action"
 -- and some attributes, such as if it needs fuel or not.
-local function executeInstruction(instruction, settings)
+function movescript.executeInstruction(instruction, settings)
     if instruction.type == INSTRUCTION_TYPES.repeated then
         debug("Executing repeated instruction " .. instruction.count .. " times.", settings)
         for i = 1, instruction.count do
             for _, nestedInstruction in pairs(instruction.instructions) do
-                executeInstruction(nestedInstruction, settings)
+                movescript.executeInstruction(nestedInstruction, settings)
             end
         end
     elseif instruction.type == INSTRUCTION_TYPES.instruction then
@@ -428,7 +428,7 @@ function movescript.run(script, settings)
     debug("Executing script: " .. script, settings)
     local instructions = movescript.parse(script, settings)
     for idx, instruction in pairs(instructions) do
-        executeInstruction(instruction, settings)
+        movescript.executeInstruction(instruction, settings)
     end
 end
 

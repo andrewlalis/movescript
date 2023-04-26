@@ -40,6 +40,7 @@ jobs:
           script_dir=docs/src/.vuepress/public/scripts
           lua minify.lua minify src/movescript.lua > $script_dir/movescript-min.lua
           lua minify.lua minify src/itemscript.lua > $script_dir/itemscript-min.lua
+          lua minify.lua minify src/buildscript.lua > $script_dir/buildscript-min.lua
           
       - name: Clean Up Lua Artifacts
         run: |

@@ -2,9 +2,9 @@
 
 This directory contains all scripts published under **Movescript**.
 
-- [movescript](/scripts/movescript.lua)
-- [movescript-min](/scripts/movescript-min.lua)
-- [itemscript](/scripts/itemscript.lua)
-- [itemscript-min](/scripts/itemscript-min.lua)
-- [buildscript](/scripts/buildscript.lua)
-- [buildscript-min](/scripts/buildscript-min.lua)
+- [movescript](./movescript.lua)
+- [movescript-min](./movescript-min.lua)
+- [itemscript](./itemscript.lua)
+- [itemscript-min](./itemscript-min.lua)
+- [buildscript](./buildscript.lua)
+- [buildscript-min](./buildscript-min.lua)

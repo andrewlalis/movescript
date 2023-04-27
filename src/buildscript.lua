@@ -19,7 +19,7 @@ function buildscript.runWithItem(ms_script, filterExpr, settings)
 end
 
 -- Runs a movescript script, while selecting random items that match a filter.
-function buildscript.runWithRandomItems(ms_script, filterExpr)
+function buildscript.runWithRandomItems(ms_script, filterExpr, settings)
     movescript.run(ms_script, settings, function() itemscript.selectRandomOrWait(filterExpr) end)
 end
 

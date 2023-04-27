@@ -6,6 +6,7 @@ on:
     paths:
       - src/**
       - docs/**
+      - .github/workflows/deploy-docs2.yml
 
   workflow_dispatch:
 

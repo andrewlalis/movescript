@@ -259,7 +259,7 @@ function itemscript.totalCount(filterExpr)
     local filter = itemscript.filterize(filterExpr)
     local count = 0
     for i = 1, 16 do
-        local item = t.getItemDetail(i)
+        local item = turtle.getItemDetail(i)
         if filter(item) then
             count = count + item.count
         end

@@ -291,7 +291,7 @@ function movescript.executeInstruction(instruction, settings)
         if action then
             debug("Executing action \"" .. instruction.action .. "\" " .. instruction.count .. " times.", settings)
             local shouldRefuel = (
-                (settings.safe or true) and
+                ((settings ~= nil and settings.safe) or true) and
                 (action.needsFuel) and
                 (instruction.count > t.getFuelLevel())
             )

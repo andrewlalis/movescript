@@ -50,6 +50,8 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v3
+        with:
+          node-verson: 16
 
       - name: Setup Pages
         uses: actions/configure-pages@v2

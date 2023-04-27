@@ -292,22 +292,20 @@ function itemscript.selectRandom(filterExpr)
     return true
 end
 
--- Selects a slot containing at least minCount (or 1) of an item type matching
+-- Selects a slot containing at least 1 of an item type matching
 -- the given filter expression.
-function itemscript.selectOrWait(filterExpr, minCount)
-    minCount = minCount or 1
+function itemscript.selectOrWait(filterExpr)
     local filter = itemscript.filterize(filterExpr)
-    while itemscript.totalCount(filter) < minCount do
-        print("Couldn't find at least " .. minCount .. " item(s) matching the filter expression: \"" .. filterExpr .. "\". Please add it.")
+    while not itemscript.select(filter) do
+        print("Couldn't find at least 1 item matching the filter expression: \"" .. filterExpr .. "\". Please add it.")
         os.pullEvent("turtle_inventory")
     end
 end
 
-function itemscript.selectRandomOrWait(filterExpr, minCount)
-    minCount = minCount or 1
+function itemscript.selectRandomOrWait(filterExpr)
     local filter = itemscript.filterize(filterExpr)
-    while itemscript.totalCount(filter) < minCount do
-        print("Couldn't find at least " .. minCount .. " item(s) matching the filter expression: \"" .. filterExpr .. "\". Please add it.")
+    while not itemscript.select(filter) do
+        print("Couldn't find at least 1 item matching the filter expression: \"" .. filterExpr .. "\". Please add it.")
         os.pullEvent("turtle_inventory")
     end
 end
@@ -322,6 +320,13 @@ function itemscript.selectEmpty()
         end
     end
     return false
+end
+
+function itemscript.selectEmptyOrWait()
+    while not itemscript.selectEmpty() do
+        print("Couldn't find an empty slot. Please remove some items.")
+        os.pullEvent("turtle_inventory")
+    end
 end
 
 -- Helper function to drop items in a flexible way, using a drop function and filtering function.

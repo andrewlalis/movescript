@@ -26,7 +26,7 @@ end
 print("----------------------------")
 for _, lib in pairs(libs) do
     local nameIdx = string.find(lib, "%.")
-    local name = string.sub(lib, nameIdx - 1, -1)
+    local name = string.sub(lib, 1, nameIdx - 1)
     local m = require(name)
     print("  " .. lib .. " installed with version " .. m.VERSION)
 end

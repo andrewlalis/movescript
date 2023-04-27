@@ -23,8 +23,11 @@ for _, lib in pairs(libs) do
     end
     print("Downloaded " .. lib)
 end
-print("Done!")
+print("----------------------------")
 for _, lib in pairs(libs) do
-    local m = require(lib)
+    local nameIdx = string.find(lib, "%.")
+    local name = string.sub(lib, nameIdx - 1, -1)
+    local m = require(name)
     print("  " .. lib .. " installed with version " .. m.VERSION)
 end
+print("Done!")

@@ -59,7 +59,6 @@ end
 ]]--
 function itemscript.parseFilterExpression(str)
     str = str:gsub("^%s*(.-)%s*$", "%1") -- Trim whitespace from the beginning and end of the string.
-    print("Parsing expr: " .. str)
     
     -- Parse group constructs
     local ignoreRange = nil
@@ -70,7 +69,6 @@ function itemscript.parseFilterExpression(str)
         end
         -- If the group is the whole expression, parse it. Otherwise, defer parsing to later.
         if idx2 == #str then
-            print("Found GROUP")
             return itemscript.parseFilterExpression(string.sub(str, idx1 + 1, idx2 - 1))
         else
             ignoreRange = {idx1, idx2}
@@ -85,7 +83,6 @@ function itemscript.parseFilterExpression(str)
     for _, operator in pairs(logicalGroupOperators) do
         local idx = string.find(str, operator.token)
         if idx ~= nil and (ignoreRange == nil or idx < ignoreRange[1] or idx > ignoreRange[2]) then
-            print("Found " .. operator.name)
             return {
                 type = operator.name,
                 children = {
@@ -108,7 +105,6 @@ function itemscript.parseFilterExpression(str)
     for typeName, token in pairs(arithmeticOperators) do
         local idx = string.find(str, token)
         if idx ~= nil and (ignoreRange == nil or idx < ignoreRange[1] or idx > ignoreRange[2]) then
-            print("Found " .. typeName)
             local subExpr = itemscript.parseFilterExpression(string.sub(str, 1, idx - 1))
             local numberExprIdx1, numberExprIdx2 = string.find(str, "%d+", idx + 1)
             if numberExprIdx1 == nil then
@@ -128,7 +124,6 @@ function itemscript.parseFilterExpression(str)
 
     -- Parse NOT operator.
     if string.sub(str, 1, 1) == "!" then
-        print("Found NOT")
         return {
             type = "NOT",
             expr = itemscript.parseFilterExpression(string.sub(str, 2, -1))
@@ -300,6 +295,15 @@ end
 -- Selects a slot containing at least minCount (or 1) of an item type matching
 -- the given filter expression.
 function itemscript.selectOrWait(filterExpr, minCount)
+    minCount = minCount or 1
+    local filter = itemscript.filterize(filterExpr)
+    while itemscript.totalCount(filter) < minCount do
+        print("Couldn't find at least " .. minCount .. " item(s) matching the filter expression: \"" .. filterExpr .. "\". Please add it.")
+        os.pullEvent("turtle_inventory")
+    end
+end
+
+function itemscript.selectRandomOrWait(filterExpr, minCount)
     minCount = minCount or 1
     local filter = itemscript.filterize(filterExpr)
     while itemscript.totalCount(filter) < minCount do

@@ -11,6 +11,7 @@ local libs = {
 local BASE_URL = "https://andrewlalis.github.io/movescript/scripts/"
 
 print("Running Movescript installer")
+print("----------------------------")
 for _, lib in pairs(libs) do
     if fs.exists(lib) then
         fs.delete(lib)
@@ -23,3 +24,7 @@ for _, lib in pairs(libs) do
     print("Downloaded " .. lib)
 end
 print("Done!")
+for _, lib in pairs(libs) do
+    local m = require(lib)
+    print("  " .. lib .. " installed with version " .. m.VERSION)
+end

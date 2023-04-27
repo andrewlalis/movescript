@@ -294,12 +294,13 @@ end
 
 -- Executes a single instruction. An instruction is a table with an "action"
 -- and some attributes, such as if it needs fuel or not.
-function movescript.executeInstruction(instruction, settings)
+function movescript.executeInstruction(instruction, settings, preExecuteHook, postExecuteHook)
+    if settings == nil then settings = movescript.defaultSettings end
     if instruction.type == INSTRUCTION_TYPES.repeated then
         debug("Executing repeated instruction " .. instruction.count .. " times.", settings)
         for i = 1, instruction.count do
             for _, nestedInstruction in pairs(instruction.instructions) do
-                movescript.executeInstruction(nestedInstruction, settings)
+                movescript.executeInstruction(nestedInstruction, settings, preExecuteHook, postExecuteHook)
             end
         end
     elseif instruction.type == INSTRUCTION_TYPES.instruction then
@@ -316,7 +317,9 @@ function movescript.executeInstruction(instruction, settings)
                 refuelToAtLeast(fuelRequired, settings)
             end
             for i = 1, instruction.count do
+                if preExecuteHook ~= nil then preExecuteHook() end
                 action.f(instruction.options, settings)
+                if postExecuteHook ~= nil then postExecuteHook() end
             end
         end
     end
@@ -437,21 +440,21 @@ function movescript.parse(script, settings)
     return instructions
 end
 
-function movescript.run(script, settings)
+function movescript.run(script, settings, preExecuteHook, postExecuteHook)
     settings = settings or movescript.defaultSettings
     script = script or ""
     debug("Executing script: " .. script, settings)
     local instructions = movescript.parse(script, settings)
     for idx, instruction in pairs(instructions) do
-        movescript.executeInstruction(instruction, settings)
+        movescript.executeInstruction(instruction, settings, preExecuteHook, postExecuteHook)
     end
 end
 
-function movescript.runFile(filename, settings)
+function movescript.runFile(filename, settings, preExecuteHook, postExecuteHook)
     local f = fs.open(filename, "r")
     local script = f.readAll()
     f.close()
-    movescript.run(script, settings)
+    movescript.run(script, settings, preExecuteHook, postExecuteHook)
 end
 
 function movescript.validate(script, settings)

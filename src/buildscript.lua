@@ -14,21 +14,13 @@ local buildscript = {}
 buildscript.VERSION = "0.0.1"
 
 -- Runs a movescript script, while ensuring that a given item is always selected.
-function buildscript.runWithItem(ms_script, filterExpr)
-    local instructions = movescript.parse(ms_script)
-    for idx, instruction in pairs(instructions) do
-        itemscript.selectOrWait(filterExpr)
-        movescript.executeInstruction(instruction)
-    end
+function buildscript.runWithItem(ms_script, filterExpr, settings)
+    movescript.run(ms_script, settings, function() itemscript.selectOrWait(filterExpr) end)
 end
 
 -- Runs a movescript script, while selecting random items that match a filter.
 function buildscript.runWithRandomItems(ms_script, filterExpr)
-    local instructions = movescript.parse(ms_script)
-    for idx, instruction in pairs(instructions) do
-        itemscript.selectRandomOrWait(filterExpr)
-        movescript.executeInstruction(instruction)
-    end
+    movescript.run(ms_script, settings, function() itemscript.selectRandomOrWait(filterExpr) end)
 end
 
 -- Parses a value for an argument specification from a raw value.

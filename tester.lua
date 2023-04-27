@@ -24,12 +24,23 @@ function print_r (t, name, indent)
 -- local ms = require("src/movescript")
 -- print_r(ms.parse("35(2F(safe=false)R 3(L(delay=0.25, file=file.txt)UB))", {debug=true}))
 
-local bs = require("src/buildscript")
-local args = {...}
-local spec = {
-  num = { type = "number", required = true, idx = 1 },
-  name = { name = "name", type = "bool", required = true }
+-- local bs = require("src/buildscript")
+-- local args = {...}
+-- local spec = {
+--   num = { type = "number", required = true, idx = 1 },
+--   name = { name = "name", type = "bool", required = true }
+-- }
+-- local success, result = bs.parseArgs(args, spec)
+-- print(success)
+-- print_r(result)
+
+local is = require("src/itemscript")
+local t = is.parseFilterExpression("!log")
+print_r(t, "filter_expression_syntax_tree", "  ")
+local filter = is.compileFilter(t)
+local item = {
+  name = "minecraft:oak_log",
+  count = 54
 }
-local success, result = bs.parseArgs(args, spec)
-print(success)
-print_r(result)
+local matches = filter(item)
+print(matches)

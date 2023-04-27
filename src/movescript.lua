@@ -7,8 +7,6 @@ Movescript provides a simpler, conciser way to program "turtles" (robots), so
 that you don't need to get tired of typing "turtle.forward()" over and over.
 
 ]]--
-VERSION = "0.0.1"
-
 local t = turtle
 -- For testing purposes, if the turtle API is not present, we inject our own.
 if not t then t = {
@@ -17,6 +15,7 @@ if not t then t = {
 
 -- The movescript module. Functions defined within this table are exported.
 local movescript = {}
+movescript.VERSION = "0.0.1"
 
 movescript.defaultSettings = {
     debug = false,

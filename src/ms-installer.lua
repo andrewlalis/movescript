@@ -10,6 +10,7 @@ local libs = {
 
 local BASE_URL = "https://andrewlalis.github.io/movescript/scripts/"
 
+print("Running Movescript installer")
 for _, lib in pairs(libs) do
     if fs.exists(lib) then
         fs.delete(lib)

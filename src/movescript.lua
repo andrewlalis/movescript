@@ -100,19 +100,35 @@ local function goLeft(options, settings)
     t.turnLeft()
 end
 
+local function placeFunction(func, digFunction, detectFunction, settings, options)
+    settings = settings or movescript.defaultSettings
+    safe = settings.safe or movescript.defaultSettings.safe
+    destructive = settings.destructive or movescript.defaultSettings.destructive
+    local success = func(options.text)
+    if not safe then return end
+    while not success do
+        debug("Unable to place.", settings)
+        if destructive and detectFunction() then
+            debug("Detected a block in the way; attempting to remove it.", settings)
+            digFunction()
+        end
+        success = func(options.text)
+    end
+end
+
 local function place(options, settings)
     debug("Placing.", settings)
-    t.place(options.text)
+    placeFunction(t.place, t.dig, t.detect, settings, options)
 end
 
 local function placeUp(options, settings)
     debug("Placing up.", settings)
-    t.placeUp(options.text)
+    placeFunction(t.placeUp, t.digUp, t.detectUp, settings, options)
 end
 
 local function placeDown(options, settings)
     debug("Placing down.", settings)
-    t.placeDown(options.text)
+    placeFunction(t.placeDown, t.digDown, t.detectDown, settings, options)
 end
 
 local function attack(options, settings)

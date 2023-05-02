@@ -81,4 +81,4 @@ The following snippets show a few example scripts, along with a description of w
 
 `B2RAd` - Move back, then turn right twice, and then attack downward.
 
-
+`4(U2RD)` - 4 times in a row, move up, twice right, and back down.

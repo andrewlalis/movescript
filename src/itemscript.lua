@@ -310,7 +310,7 @@ function itemscript.selectRandomOrWait(filterExpr)
     end
 end
 
--- Selects an empty slot.
+-- Selects the first empty slot, if there is one. Returns true if an empty slot could be selected.
 function itemscript.selectEmpty()
     for i = 1, 16 do
         local item = turtle.getItemDetail(i)
@@ -322,10 +322,23 @@ function itemscript.selectEmpty()
     return false
 end
 
+-- Selects the first empty slot, or prompts the user to remove items so that an empty slot can be selected.
 function itemscript.selectEmptyOrWait()
     while not itemscript.selectEmpty() do
         print("Couldn't find an empty slot. Please remove some items.")
         os.pullEvent("turtle_inventory")
+    end
+end
+
+-- Gets a list of all inventory slots that match the given filter expression.
+function itemscript.findSlots(filterExpr)
+    local filter = itemscript.filterize(filterExpr)
+    local slots = {}
+    for i = 1, 16 do
+        local item = turtle.getItemDetail(i)
+        if filter(item) then
+            table.insert(slots, i)
+        end
     end
 end
 

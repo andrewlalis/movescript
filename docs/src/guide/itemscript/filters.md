@@ -26,6 +26,27 @@ In the case of strings, a **filter expression string** is a string that can be u
 
 The most basic form of an expression string is just an item name, like `"minecraft:dirt"`, or `"create:train_door"`. Most normal items will begin with the `minecraft:` *namespace* prefix. If you don't include such a prefix, and you're not doing a [fuzzy match](#fuzzy-match), itemscript will add `minecraft:` for you.
 
+### Grammar
+
+Filter expressions can be summarized with a BNF-style grammar description.
+
+```
+word        = %a[%w%-_:]*       A whole or substring of an item's name.
+number      = %d+
+expr        = word              Matches item stacks whose name matches the given word.
+            = #word             Matches item stacks whose name contains the given word.
+            = (expr)            Grouping of a nested expression.
+            = !expr             Matches item stacks that don't match the given expression.
+            = expr | expr       Matches item stacks that match any of the given expressions (OR).
+            = expr & expr       Matches item stacks that match all of the given expressions (AND).
+            = expr > number     Matches item stacks that match the given expression, and have more than N items.
+            = expr >= number    Matches item stacks that match the given expression, and have more than or equal to N items.
+            = expr < number     Matches item stacks that match the given expression, and have less than N items.
+            = expr <= number    Matches item stacks that match the given expression, and have less than or equal to N items.
+            = expr = number     Matches item stacks that match the given expression, and have exactly N items.
+            = expr != number    Matches item stacks that match the given expression, and do not have exactly N items.
+```
+
 For example, we can count the number of stone items in our inventory like this:
 
 ```lua

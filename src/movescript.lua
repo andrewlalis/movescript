@@ -461,4 +461,13 @@ function movescript.validate(script, settings)
     return pcall(function () movescript.parse(script, settings) end)
 end
 
+-- "Mirrors" a movescript; that is, swaps any "turn right" instructions for "turn left", and vice versa.
+-- Note that it does not mirror "equip right" and "equip left" instructions.
+function movescript.mirror(script)
+    local template = string.gsub(script, "L", "__LEFT__")
+    template = string.gsub(template, "R", "__RIGHT__")
+    local result = string.gsub(template, "__LEFT__", "R")
+    return string.gsub(result, "__RIGHT__", "L")
+end
+
 return movescript

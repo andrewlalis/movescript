@@ -11,7 +11,11 @@ ms.run("2F")
 
 Parses the given `script` string and returns a table containing the parsed instructions to be executed. This is mostly useful for debugging your scripts.
 
-## `run(script, settings)`
+## `executeInstruction(instruction, settings, preExecuteHook, postExecuteHook)`
+
+Executes a single instruction table using the given settings, and if pre- and post-execution hooks are defined, they will be invoked. This is mostly useful for debugging your scripts.
+
+## `run(script, settings, preExecuteHook, postExecuteHook)`
 
 Runs the given `script` string as a movescript, and optionally a `settings` table can be provided. Otherwise, [default settings](settings.md) will be used.
 
@@ -22,7 +26,9 @@ local ms = require("movescript")
 ms.run("3F2R3B2LUD", {debug=true})
 ```
 
-## `runFile(filename, settings)`
+If you provide a non-nil `preExecuteHook` or `postExecuteHook` function, that function will run before or after each instruction in the script, respectively. This could be used to update other systems as to the robot's status, or to make sure items are selected.
+
+## `runFile(filename, settings, preExecuteHook, postExecuteHook)`
 
 Reads content from the given filename and executes it as a script. Just like with `run`, an optional `settings` table can be provided.
 
@@ -36,6 +42,12 @@ For example:
 local ms = require("movescript")
 local status, message = ms.validate("not a valid script.")
 ```
+
+## `mirror(script)`
+
+Mirrors the given `script`. That is, this swaps any `R` (turn right) instructions with `L` (turn left), which effectively mirrors the robot's motion relative to its original facing direction.
+
+Returns the mirrored script which can then be run.
 
 ## `defaultSettings`
 

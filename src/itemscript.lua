@@ -248,16 +248,34 @@ function itemscript.filterize(value)
     end
 end
 
-
--- Gets the total number of items in the turtle's inventory that match the given expression.
-function itemscript.totalCount(filterExpr)
+-- Finds the first matching slot for the given filter expression.
+function itemscript.findSlot(filterExpr)
     local filter = itemscript.filterize(filterExpr)
-    local count = 0
+    for i = 1, 16 do
+        local item = turtle.getItemDetail(i)
+        if filter(i) then return i end
+    end
+    return nil
+end
+
+-- Gets a list of all inventory slots that match the given filter expression.
+function itemscript.findSlots(filterExpr)
+    local filter = itemscript.filterize(filterExpr)
+    local slots = {}
     for i = 1, 16 do
         local item = turtle.getItemDetail(i)
         if filter(item) then
-            count = count + item.count
+            table.insert(slots, i)
         end
+    end
+end
+
+-- Gets the total number of items in the turtle's inventory that match the given expression.
+function itemscript.totalCount(filterExpr)
+    local count = 0
+    for _, slot in pairs(itemscript.findSlots(filterExpr)) do
+        local item = turtle.getItemDetail(slot)
+        count = count + item.count
     end
     return count
 end
@@ -265,27 +283,17 @@ end
 -- Select the first slot containing a matching item stack for a filter.
 -- Returns a boolean indicating whether we could find and select the item.
 function itemscript.select(filterExpr)
-    local filter = itemscript.filterize(filterExpr)
-    for i = 1, 16 do
-        local item = turtle.getItemDetail(i)
-        if filter(item) then
-            turtle.select(i)
-            return true
-        end
+    local slot = itemscript.findSlot(filterExpr)
+    if slot ~= nil then
+        turtle.select(slot)
+        return true
     end
     return false
 end
 
 -- Selects a random slot containing a matching item stack.
 function itemscript.selectRandom(filterExpr)
-    local filter = itemscript.filterize(filterExpr)
-    local eligibleSlots = {}
-    for i = 1, 16 do
-        local item = turtle.getItemDetail(i)
-        if filter(item) then
-            table.insert(eligibleSlots, i)
-        end
-    end
+    local eligibleSlots = itemscript.findSlots(filterExpr)
     if #eligibleSlots == 0 then return false end
     local slot = eligibleSlots[math.random(1, #eligibleSlots)]
     turtle.select(slot)
@@ -327,18 +335,6 @@ function itemscript.selectEmptyOrWait()
     while not itemscript.selectEmpty() do
         print("Couldn't find an empty slot. Please remove some items.")
         os.pullEvent("turtle_inventory")
-    end
-end
-
--- Gets a list of all inventory slots that match the given filter expression.
-function itemscript.findSlots(filterExpr)
-    local filter = itemscript.filterize(filterExpr)
-    local slots = {}
-    for i = 1, 16 do
-        local item = turtle.getItemDetail(i)
-        if filter(item) then
-            table.insert(slots, i)
-        end
     end
 end
 

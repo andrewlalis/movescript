@@ -253,7 +253,7 @@ function itemscript.findSlot(filterExpr)
     local filter = itemscript.filterize(filterExpr)
     for i = 1, 16 do
         local item = turtle.getItemDetail(i)
-        if filter(i) then return i end
+        if filter(item) then return i end
     end
     return nil
 end

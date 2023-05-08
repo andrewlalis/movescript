@@ -268,6 +268,7 @@ function itemscript.findSlots(filterExpr)
             table.insert(slots, i)
         end
     end
+    return slots
 end
 
 -- Gets the total number of items in the turtle's inventory that match the given expression.

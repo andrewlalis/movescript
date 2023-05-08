@@ -136,7 +136,7 @@ function itemscript.parseFilterExpression(str)
         fuzzy = true
         str = string.sub(str, 2, -1)
     end
-    local wordIdx1, wordIdx2 = string.find(str, "%a[%w%-_]*")
+    local wordIdx1, wordIdx2 = string.find(str, "%a[%w%-_:]*")
     if wordIdx1 ~= nil then
         local value = string.sub(str, wordIdx1, wordIdx2)
         if not fuzzy and string.find(value, ":") == nil then
